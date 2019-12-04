@@ -1422,7 +1422,8 @@ update_doc_interactive(Db, Doc0, Future, _Options) ->
         rev_path => NewRevPath,
         sequence => undefined,
         branch_count => undefined,
-        att_hash => fabric2_util:hash_atts(Atts)
+        att_hash => fabric2_util:hash_atts(Atts),
+        rev_size => null
     },
 
     % Gather the list of possible winnig revisions
@@ -1478,7 +1479,8 @@ update_doc_replicated(Db, Doc0, _Options) ->
         rev_path => RevPath,
         sequence => undefined,
         branch_count => undefined,
-        att_hash => <<>>
+        att_hash => <<>>,
+        rev_size => null
     },
 
     AllRevInfos = fabric2_fdb:get_all_revs(Db, DocId),
