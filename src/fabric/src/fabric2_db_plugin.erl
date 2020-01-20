@@ -40,12 +40,32 @@ before_doc_update(_, #doc{id = <<?LOCAL_DOC_PREFIX, _/binary>>} = Doc, _) ->
     Doc;
 
 before_doc_update(Db, Doc0, UpdateType) ->
+    maybe_update_indexes(Db, Doc0, UpdateType),
     Fun = fabric2_db:get_before_doc_update_fun(Db),
     case with_pipe(before_doc_update, [Doc0, Db, UpdateType]) of
         [Doc1, _Db, UpdateType1] when is_function(Fun) ->
             Fun(Doc1, Db, UpdateType1);
         [Doc1, _Db, _UpdateType] ->
             Doc1
+    end.
+
+
+maybe_update_indexes(Db, Doc, _UpdateType) ->
+    couch_log:info("~p maybe_update_indexes Db: ~p Doc: ~p", [?MODULE, Db, Doc]),
+    couch_log:info("~p maybe_update_indexes Op: ~p", [?MODULE, op(Doc)]).
+
+
+op(#doc{revs = Revs, deleted = Deleted}) ->
+    case Revs of
+        {0, []} ->
+            create;
+        _ ->
+            case Deleted of
+                true ->
+                    delete;
+                false ->
+                    update
+            end
     end.
 
 
